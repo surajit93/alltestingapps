@@ -1,0 +1,190 @@
+<script
+                src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<!-- <script src="//code.angularjs.org/snapshot/angular.min.js"></script> -->
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script
+                src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.5.0.js"></script>
+               
+                <script type="text/javascript" src="https://rawgit.com/fordth/jinqJs/master/jinqjs.js"></script>
+ 
+<script type="text/javascript">
+var apikey="1ae9e747bc2c98dca6b061bda674ec18";
+var cityId="";
+var baseURL="https://developers.zomato.com/api/v2.1/";
+var cityName="";
+var countryId="";
+var countryName="";
+var latitude="";
+var longitude="";
+var loctitle="";
+ 
+</script>
+ 
+<div id='id_choosecity_div'>
+<label>Choose Your City</label>
+<input type='text' placeholder='Type City'/ id='id_citiselect' onchange='return showCityListSuggestion()'>
+</div>
+<table id='table_id_citySelect' style="width: 200px;"><tbody><tr><td><div id='id_loc_suggestdiv' onclick='return hideAllAndShowCuisineRestaurants()' style='width: auto !important;height: auto !important;border: 2px solid red;background-color: #f15c5c;color: white;font-weight: bold; cursor:pointer'>
+</div></td></tr></tbody></table>
+<script type="text/javascript">
+function showCityListSuggestion(){
+var cityTxt =  document.getElementById("id_citiselect").value;
+var url="";
+url+=baseURL+"locations?query="+cityTxt;
+ 
+$.ajax({
+               
+                 headers: {
+ 
+                                                'user-key' : "1ae9e747bc2c98dca6b061bda674ec18"                                        
+                    },
+       url: url,
+       method: "GET",
+     
+      
+       cache: false,
+       success: function(result){
+                   var loc = result.location_suggestions[0];
+                  
+                     cityId=loc.city_id;
+                                cityName=loc.city_name;
+                                countryId=loc.country_id;
+                                countryName=loc.country_name;
+                                latitude=loc.latitude;
+                                longitude=loc.longitude;
+                                loctitle=loc.title;
+                                document.getElementById("id_loc_suggestdiv").innerHTML=loctitle;
+                   }
+                   });
+ 
+}
+ 
+ 
+function hideAllAndShowCuisineRestaurants(){
+var id_choosecity_div = document.getElementById("id_choosecity_div");
+var table_id_citySelect = document.getElementById("table_id_citySelect");
+ 
+$(id_choosecity_div).fadeOut('slow');
+$(table_id_citySelect).fadeOut('slow');
+ 
+ 
+var chooseCuisineInput = document.createElement('td');
+chooseCuisineInput.innerHTML="<input type='button' id='id_choose_cuisine' value='Cuisine...' onclick='return showCuisinList()'>";
+ 
+var chooseRestaurantInput = document.createElement('td');
+chooseRestaurantInput.innerHTML="<input type='button' id='id_choose_restaurant' value='Restaurant...' onclick='return showRestaurantList()'>";
+ 
+var tabchoosecuisinerestaurant = document.createElement('table');
+ 
+tabchoosecuisinerestaurant.innerHTML="<tbody><tr> </tr></tbody>"
+tabchoosecuisinerestaurant.id='id_btn_showcuisinelist_restaurantlist';
+tabchoosecuisinerestaurant.children[0].children[0].appendChild(chooseCuisineInput);
+tabchoosecuisinerestaurant.children[0].children[0].insertBefore(chooseRestaurantInput,chooseCuisineInput);
+document.body.appendChild(tabchoosecuisinerestaurant);
+}
+ 
+function showCuisinList(){
+ 
+var url="";
+url+=baseURL+"/cuisines?city_id="+cityId;
+ 
+$.ajax({
+               
+                 headers: {
+ 
+                                                'user-key' : "1ae9e747bc2c98dca6b061bda674ec18"                                        
+                    },
+       url: url,
+       method: "GET",
+     
+      
+       cache: false,
+       success: function(result){
+                  
+                   var id_all_restaurants = document.getElementById("id_all_restaurants");
+                   if(id_all_restaurants!==null){
+                   id_all_restaurants.parentNode.removeChild(id_all_restaurants);
+                   }
+                   console.log(result);
+                    var count = result.cuisines.length;
+                                var cuisineResultHTML="<table><tbody>";
+                                for(var i=0;i<count;i++){
+                   console.log(result.cuisines[i].cuisine);
+                    var cuisine = result.cuisines[i].cuisine;
+                                var cuisine_name = cuisine.cuisine_name;
+                                var cuisine_id= cuisine.cuisine_id;
+                                cuisineResultHTML+="<tr><td style='border:none;border-bottom: 1px solid blue;'><table style='height: 30px !important;cursor:pointer;table-layout: auto;border-collapse: collapse;'><tbody><tr><td style='border:none;'><b>"+cuisine_name+"</b></td></tr>";
+                                cuisineResultHTML+="</tbody></table></td></tr>";
+                                }
+                               
+                                cuisineResultHTML+="</tbody></table>";
+                               
+                                var divCuisineAllList = document.createElement("div");
+                   divCuisineAllList.style="float: left;width: 348px;height: 200px !important;overflow-y: scroll;overflow-x: scroll;";
+                   divCuisineAllList.innerHTML= cuisineResultHTML;
+                   divCuisineAllList.id='id_all_cuisines';
+                   document.body.appendChild(divCuisineAllList);
+                               
+                   }
+                   });
+}
+function showRestaurantList(){
+ 
+var url="";
+url+=baseURL+"/search?entity_id="+cityId+"&entity_type=city";
+ 
+$.ajax({
+               
+                 headers: {
+ 
+                                                'user-key' : "1ae9e747bc2c98dca6b061bda674ec18"                                        
+                    },
+       url: url,
+       method: "GET",
+     
+      
+       cache: false,
+       success: function(result){
+                   console.log(result);
+                  
+                   
+                   var count = result.restaurants.length;
+                  
+                    var id_all_cuisines = document.getElementById("id_all_cuisines");
+                   if(id_all_cuisines!==null){
+                   id_all_cuisines.parentNode.removeChild(id_all_cuisines);
+                   }
+                  
+                   var resturantListHTML="<table><tbody>";
+                   for(var i=0;i<count;i++){
+                   console.log(result.restaurants[i].restaurant);
+                    var restaurant = result.restaurants[i].restaurant;
+                                var name = restaurant.name;
+                                var restaurantid = restaurant.id;
+                                var rating = restaurant.user_rating.aggregate_rating;
+                                var ratingtxt = restaurant.user_rating.rating_text;
+                                var ratingvotes = restaurant.user_rating.votes;
+                                var ratingcolor =  restaurant.user_rating.rating_color;
+                               
+                                resturantListHTML+="<tr><td style='border:none;border-bottom: 1px solid blue;'><table style='height: 30px !important;cursor:pointer;table-layout: auto;border-collapse: collapse;'><tbody><tr><td style='border:none;'><b>"+name+"</b></td></tr>";
+                                resturantListHTML+="<tr><td style='border:none;'>"+rating+"<td><td style='border:none; background-color:"+ratingcolor+"'>"+ratingtxt+"<td><td style='border:none;'>Out of "+ratingvotes+" Reviews <td></tr>";
+                                resturantListHTML+="</tbody></table></td></tr>";
+                   }
+                   resturantListHTML+="</tbody></table>";
+                  
+                   var divRestaurantAllList = document.createElement("div");
+                   divRestaurantAllList.style="float: left;width: 348px;height: 200px !important;overflow-y: scroll;overflow-x: scroll;";
+                   divRestaurantAllList.innerHTML= resturantListHTML;
+                   divRestaurantAllList.id='id_all_restaurants';
+                   document.body.appendChild(divRestaurantAllList);
+                  /*var id_btn_showcuisinelist_restaurantlist = document.getElementById("id_btn_showcuisinelist_restaurantlist");
+                 
+                  id_btn_showcuisinelist_restaurantlist.insertAfter(divRestaurantAllList);*/
+                  
+                   }
+                   });
+}
+</script>
+ 
+ 
